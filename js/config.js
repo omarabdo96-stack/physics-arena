@@ -12,7 +12,7 @@ export const SITE = {
   // Students sign in with ID + password. Behind the scenes the ID becomes an email like t156@physicsarena.app
   EMAIL_DOMAIN: "physicsarena.app",
   // Paste the links here (inside the quotes). Leave empty until you have them.
-  NEW_STUDENT_URL: "",   // registration portal for new students
-  EXAMS_URL: "",         // the separate exams platform
+  NEW_STUDENT_URL: "https://omarabdo96-stack.github.io/New-Student-Portal/",   // registration portal for new students
+  EXAMS_URL: "https://omarabdo96-stack.github.io/Exam-Portal/",       // the separate exams platform
   WHATSAPP: "201550079074"
 };
