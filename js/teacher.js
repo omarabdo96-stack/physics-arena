@@ -1,6 +1,7 @@
 import { firebaseConfig, SITE } from './config.js';
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+import { createContentManager } from './teacher-content.js';
 import { getFirestore, doc, getDoc, getDocs, collection, writeBatch, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -15,7 +16,7 @@ const auth = getAuth(fb), db = getFirestore(fb);
 let creator;
 const creatorAuth = () => (creator ||= getAuth(initializeApp(firebaseConfig, 'creator')));
 
-let students = [], priv = {}, year = 'T', query = '';
+let students = [], priv = {}, year = 'T', query = '', view = 'students';
 
 /* ---------- small helpers ---------- */
 let toastTimer;
@@ -52,6 +53,8 @@ Link: ${site}
 - Mr Omar Abd alhady`;
   return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
 }
+
+const content = createContentManager({ db, toast });
 
 /* ---------- sign in / out ---------- */
 const loginView = $('#loginView'), appView = $('#appView'), loginBtn = $('#loginBtn'), errBox = $('#loginErr');
@@ -94,7 +97,7 @@ async function loadAll() {
       : 'Could not load students. Check your connection and press Refresh.';
   }
 }
-$('#refreshBtn').addEventListener('click', async () => { await loadAll(); toast('Refreshed'); });
+$('#refreshBtn').addEventListener('click', async () => { await loadAll(); if (view === 'content') await content.reload(year); toast('Refreshed'); });
 
 /* ---------- tabs ---------- */
 const tabs = $('#tabs'), ink = $('#tabInk');
@@ -103,7 +106,8 @@ function showYear(y, first) {
   $$('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.year === y)));
   const btn = $(`.tab[data-year="${y}"]`);
   requestAnimationFrame(() => { ink.style.width = btn.offsetWidth + 'px'; ink.style.transform = `translateX(${btn.offsetLeft}px)`; });
-  if (!first) render();
+  if (!first) { render(); }
+  if (view === 'content' && !first) content.load(y);
 }
 tabs.addEventListener('click', e => { const b = e.target.closest('.tab'); if (b) showYear(b.dataset.year); });
 addEventListener('resize', () => showYear(year, true));
@@ -252,4 +256,14 @@ $('#bulkForm').addEventListener('submit', async e => {
   }
   log(made ? 'ok' : 'warn', `Done. ${made} added.`);
   bulkRun.classList.remove('loading'); render();
+});
+
+/* ---------- Students / Study content switch ---------- */
+$('#seg').addEventListener('click', e => {
+  const b = e.target.closest('button[data-view]'); if (!b) return;
+  view = b.dataset.view;
+  $$('#seg button').forEach(x => x.classList.toggle('on', x === b));
+  $('#studentsBlock').hidden = view !== 'students';
+  $('#contentBlock').hidden = view !== 'content';
+  if (view === 'content') content.load(year);
 });

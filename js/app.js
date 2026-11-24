@@ -1,6 +1,7 @@
 import { firebaseConfig, SITE } from './config.js';
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+import { initStudy } from './study.js';
 import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -21,7 +22,7 @@ const db = getFirestore(fb);
 /* ---------- Helpers ---------- */
 const loginView = $('#loginView'), appView = $('#appView');
 const sid = $('#sid'), pw = $('#pw'), errBox = $('#loginErr'), loginBtn = $('#loginBtn');
-let toastTimer;
+let toastTimer, study = null;
 function toast(msg) {
   const t = $('#toast');
   t.textContent = msg; t.classList.add('show');
@@ -89,7 +90,7 @@ $('#logoutBtn').addEventListener('click', () => signOut(auth));
 onAuthStateChanged(auth, async user => {
   loginBtn.classList.remove('loading');
   const suffix = '@' + SITE.EMAIL_DOMAIN;
-  if (!user) { appView.hidden = true; loginView.hidden = false; pw.value = ''; return; }
+  if (!user) { study && study.dispose(); study = null; appView.hidden = true; loginView.hidden = false; pw.value = ''; return; }
   if (!user.email || !user.email.endsWith(suffix)) {          // e.g. the teacher account
     await signOut(auth);
     showError('This page is for students. Teachers use the teacher link.');
@@ -115,6 +116,8 @@ onAuthStateChanged(auth, async user => {
 });
 
 function enterApp(id, name) {
+  study && study.dispose();
+  study = initStudy({ db, id, name });
   const y = YEARS[id[0]];
   $('#chipId').textContent = id;
   $('#chipYear').textContent = y ? y.short : '';
@@ -139,6 +142,7 @@ function showTab(name, push = true) {
     moveInk(btn);
     tabs.scrollTo({ left: btn.offsetLeft - (tabs.clientWidth - btn.offsetWidth) / 2, behavior: 'smooth' });
   });
+  if (name === 'study' && study) study.open();
   if (push) history.replaceState(null, '', '#' + name);
 }
 tabs.addEventListener('click', e => { const b = e.target.closest('.tab'); if (b) showTab(b.dataset.tab); });

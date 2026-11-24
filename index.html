@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/study.css">
 </head>
 <body>
 <canvas id="bg" aria-hidden="true"></canvas>
@@ -101,8 +102,8 @@
 
     <section class="panel" id="panel-study" role="tabpanel" hidden>
       <div class="block">
-        <h3>My Study <span class="ar">دراستي</span></h3>
-        <div class="empty"><div class="orbit"><i></i><i></i></div><p>Your weeks will appear here.</p><small>Lectures, simulations, attachments and assessments, organised by week and lesson.</small></div>
+        <div class="study-head"><h3>My Study <span class="ar">دراستي</span></h3><button type="button" class="btn small ghost" id="studyRefresh">Refresh <span class="ar">تحديث</span></button></div>
+        <div id="studyRoot"></div>
       </div>
     </section>
 
@@ -142,6 +143,13 @@
       </div>
     </section>
   </main>
+</div>
+
+<div id="viewer" class="viewer" hidden role="dialog" aria-modal="true" aria-label="Lesson viewer" style="--wm:none">
+  <div class="v-bar"><span id="vTitle"></span><button type="button" class="btn small ghost" id="vClose">Close <span class="ar">إغلاق</span></button></div>
+  <div class="v-body" id="vBody"></div>
+  <div class="v-mark" aria-hidden="true"><span class="float" id="vFloat"></span></div>
+  <div class="v-shield" id="vShield"><div><svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><p>Content is hidden while this window is not active.</p><small>Click here to continue.</small></div></div>
 </div>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>

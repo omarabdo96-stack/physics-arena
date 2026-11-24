@@ -55,3 +55,31 @@ textarea:focus{border-color:var(--indigo);box-shadow:0 0 0 4px rgba(91,110,225,.
 .pwmeta{color:var(--mut);font-size:13px;margin-bottom:14px}
 .pwacts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 .pwacts .wa{flex:1 1 140px}
+
+/* content manager */
+.seg{display:inline-flex;gap:4px;padding:5px;margin-bottom:16px;border-radius:16px;background:rgba(10,13,52,.65);border:1px solid var(--line)}
+.seg button{border:0;background:none;color:var(--mut);font:600 14px var(--font);padding:10px 18px;border-radius:12px;cursor:pointer;transition:.25s}
+.seg button:hover{color:#fff}
+.seg button.on{color:#fff;background:linear-gradient(110deg,var(--indigo-deep),var(--indigo));box-shadow:0 8px 20px -8px rgba(91,110,225,.9)}
+.tree{display:grid;gap:14px}
+.week{border:1px solid var(--line);border-radius:20px;padding:14px;background:rgba(255,255,255,.03)}
+.week.hid{opacity:.6;border-style:dashed}
+.wk-h,.ls-h,.item{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.wk-h{margin-bottom:10px}
+.wk-h b{font-size:16px}
+.tag{font-size:11px;padding:3px 9px;border-radius:99px;background:rgba(255,98,144,.18);color:#FFB5CB}
+.ctl{margin-inline-start:auto;display:flex;gap:5px;flex-wrap:wrap}
+.ctl button,.add-sm{font:600 12px var(--font);padding:6px 10px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--lav);cursor:pointer;transition:.2s}
+.ctl button:hover,.add-sm:hover{background:rgba(91,110,225,.25);border-color:var(--indigo);color:#fff}
+.ctl button[data-act$="-del"]:hover{background:rgba(255,98,144,.22);border-color:var(--pink)}
+.lesson{margin:8px 0 8px 10px;padding:10px 12px;border-radius:14px;background:rgba(8,10,40,.45);border-inline-start:3px solid var(--indigo)}
+.ls-h{margin-bottom:6px}
+.item{padding:7px 4px;border-top:1px solid rgba(160,170,255,.1)}
+.tp{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;min-width:92px;text-align:center;background:rgba(91,110,225,.25);color:#fff}
+.t-sim .tp{background:rgba(91,227,168,.22)} .t-file .tp{background:rgba(138,99,240,.3)} .t-assess .tp{background:rgba(255,98,144,.28)}
+.it-t{flex:1 1 180px;min-width:0;font-weight:600;font-size:14px}
+.it-t small{display:block;color:var(--mut);font-weight:400;font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.add-sm{margin-top:8px}
+select{width:100%;background:none;border:0;outline:0;color:var(--ink);font:600 15px var(--font);padding:14px 16px}
+select option{background:#10154a;color:#fff}
+.inp input[type=url]{letter-spacing:0;font-size:15px}

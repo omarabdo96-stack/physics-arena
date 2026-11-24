@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isTeacher() {
+      return signedIn() && request.auth.token.email.lower() == 'omarabdo96@gmail.com';
+    }
+    // a student's ID is the part of the email before @  (t156@physicsarena.app -> T156)
+    function myId() { return request.auth.token.email.split('@')[0].upper(); }
+
+    // public-facing student record: name, year, active
+    match /students/{id} {
+      allow read: if isTeacher() || (signedIn() && myId() == id);
+      allow write: if isTeacher();
+    }
+
+    // phones + password: teacher only
+    match /student_private/{id} {
+      allow read, write: if isTeacher();
+    }
+
+    // study content: one document per year (B, C, T). Students read only their own year, and only while active.
+    match /content/{year} {
+      allow read: if isTeacher() || (
+        signedIn()
+        && myId()[0:1] == year
+        && get(/databases/$(database)/documents/students/$(myId())).data.active == true
+      );
+      allow write: if isTeacher();
+    }
+
+    // everything else is closed until we open it for a feature
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

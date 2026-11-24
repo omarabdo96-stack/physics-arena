@@ -58,7 +58,12 @@
   <main class="panels">
     <p class="err" id="appErr" hidden></p>
 
-    <section class="block">
+    <div class="seg" id="seg" role="tablist">
+      <button type="button" class="on" data-view="students">Students <span class="ar">الطلاب</span></button>
+      <button type="button" data-view="content">Study content <span class="ar">المحتوى</span></button>
+    </div>
+
+    <section class="block" id="studentsBlock">
       <div class="toolbar">
         <div class="inp search"><input id="search" type="search" placeholder="Search by ID or name" autocomplete="off"></div>
         <button class="btn small primary" id="addBtn" type="button"><span class="btn-label">Add student <span class="ar">إضافة طالب</span></span></button>
@@ -66,6 +71,15 @@
       </div>
       <div class="stats" id="stats"></div>
       <div id="list" class="list"></div>
+    </section>
+
+    <section class="block" id="contentBlock" hidden>
+      <div class="toolbar">
+        <h3 id="contentTitle" style="margin:0;flex:1 1 200px">Study content</h3>
+        <button class="btn small primary" id="addWeekBtn" type="button"><span class="btn-label">Add week <span class="ar">إضافة أسبوع</span></span></button>
+      </div>
+      <p class="note">Weeks hold lessons, lessons hold items (lecture videos, simulations, attachments, assessments). Students see the order you set here.</p>
+      <div id="contentList" class="tree"></div>
     </section>
   </main>
 </div>
@@ -111,6 +125,25 @@
       <button class="btn small ghost" type="button" data-close id="bulkClose">Close <span class="ar">إغلاق</span></button>
       <button class="btn small primary" id="bulkRun" type="submit"><span class="btn-label">Add students <span class="ar">إضافة</span></span><span class="spinner"></span></button>
     </div>
+  </form>
+</dialog>
+
+<dialog id="dlgText">
+  <form id="textForm" novalidate>
+    <h3 id="textTitle">Name</h3>
+    <div class="field plain"><label for="textVal" id="textLabel">Name</label><div class="inp"><input id="textVal" autocomplete="off"></div></div>
+    <div class="dlg-actions"><button class="btn small ghost" type="button" id="textCancel">Cancel <span class="ar">إلغاء</span></button><button class="btn small primary" type="submit"><span class="btn-label">OK <span class="ar">تم</span></span></button></div>
+  </form>
+</dialog>
+
+<dialog id="dlgItem">
+  <form id="itemForm" novalidate>
+    <h3>Content item <span class="ar">عنصر</span></h3>
+    <div class="field plain"><label for="itType">Type <span class="ar">النوع</span></label><div class="inp"><select id="itType"></select></div></div>
+    <div class="field plain"><label for="itTitle">Title <span class="ar">العنوان</span></label><div class="inp"><input id="itTitle" autocomplete="off" placeholder="e.g. Lecture 1: Motion"></div></div>
+    <div class="field plain"><label for="itUrl">Link <span class="ar">الرابط</span></label><div class="inp"><input id="itUrl" type="url" autocomplete="off" placeholder="https://"></div><small class="hint" id="itHint"></small></div>
+    <p class="err" id="itemErr" hidden></p>
+    <div class="dlg-actions"><button class="btn small ghost" type="button" id="itemCancel">Cancel <span class="ar">إلغاء</span></button><button class="btn small primary" type="submit"><span class="btn-label">Save <span class="ar">حفظ</span></span></button></div>
   </form>
 </dialog>
 
