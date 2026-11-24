@@ -96,19 +96,29 @@ onAuthStateChanged(auth, async user => {
     return;
   }
   const id = user.email.slice(0, -suffix.length).toUpperCase();
+  let name = id;
+  try {                                                         // the account must exist in the teacher's list and be active
+    const snap = await getDoc(doc(db, 'students', id));
+    if (!snap.exists() || snap.data().active === false) {
+      await signOut(auth);
+      showError('Your account is not active. Please contact Mr Omar.');
+      return;
+    }
+    if (snap.data().name) name = snap.data().name;
+  } catch {
+    await signOut(auth);
+    showError('Could not verify your account. Check your internet and try again.');
+    return;
+  }
   loginView.hidden = true; appView.hidden = false;
-  enterApp(id);
+  enterApp(id, name);
 });
 
-async function enterApp(id) {
+function enterApp(id, name) {
   const y = YEARS[id[0]];
   $('#chipId').textContent = id;
   $('#chipYear').textContent = y ? y.short : '';
-  $('#helloName').textContent = id;
-  try {                                                         // name is optional; works once the teacher has added students
-    const snap = await getDoc(doc(db, 'students', id));
-    if (snap.exists() && snap.data().name) $('#helloName').textContent = snap.data().name;
-  } catch { /* rules not open yet: keep the ID */ }
+  $('#helloName').textContent = name;
   showTab(location.hash.slice(1) || 'home', false);
 }
 

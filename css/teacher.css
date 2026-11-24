@@ -1,0 +1,57 @@
+/* Teacher dashboard additions (loads after style.css) */
+.count{font-style:normal;font-weight:800;font-size:12px;min-width:24px;text-align:center;padding:2px 8px;border-radius:99px;background:rgba(255,255,255,.12);margin-inline-start:2px}
+.tab .ar{font-size:.85em;font-style:normal}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+.toolbar .btn{width:auto;animation:none}
+.search{flex:1 1 220px}
+.search input{font-size:15px;letter-spacing:0;padding:12px 16px}
+.stats{display:flex;gap:18px;flex-wrap:wrap;color:var(--mut);font-size:13px;margin:0 2px 14px}
+.stats b{color:var(--ink);font-weight:800}
+.list{display:grid;gap:10px}
+.srow{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:13px 16px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid var(--line);transition:border-color .25s,transform .25s,background .25s}
+.srow:hover{border-color:rgba(91,110,225,.6);background:rgba(91,110,225,.08)}
+.srow.off{opacity:.55}
+.idbadge{font-weight:800;letter-spacing:.06em;font-size:14px;min-width:64px;text-align:center;padding:8px 12px;border-radius:12px;color:#fff;background:linear-gradient(120deg,var(--indigo-deep),var(--indigo))}
+.idbadge.y-C{background:linear-gradient(120deg,#6A3FC4,#8A63F0)}
+.idbadge.y-T{background:linear-gradient(120deg,#C23A71,var(--pink))}
+.who{min-width:0}
+.who b{display:block;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.who small{color:var(--mut);font-size:12px}
+.acts{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.acts button,.acts a{font:600 12.5px var(--font);padding:8px 12px;border-radius:11px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--lav);cursor:pointer;text-decoration:none;transition:.2s}
+.acts button:hover,.acts a:hover{background:rgba(91,110,225,.25);border-color:var(--indigo);color:#fff}
+.acts .wa{border-color:rgba(91,227,168,.4);color:#9BF2CB}
+.acts .wa:hover{background:rgba(91,227,168,.18);border-color:var(--ok)}
+.acts .wa[disabled]{opacity:.35;cursor:not-allowed;pointer-events:none}
+.acts .wa.parent{border-color:rgba(255,98,144,.45);color:#FFB5CB}
+.acts .wa.parent:hover{background:rgba(255,98,144,.2);border-color:var(--pink)}
+.nothing{padding:36px 12px;text-align:center;color:var(--mut);border:1.5px dashed var(--line);border-radius:18px}
+@media (max-width:760px){
+  .srow{grid-template-columns:auto 1fr}
+  .acts{grid-column:1/-1;justify-content:flex-start}
+  .tab .ar{display:none}
+}
+
+/* dialogs */
+dialog{border:0;padding:0;margin:auto;width:min(520px,calc(100vw - 28px));max-height:calc(100dvh - 28px);overflow:auto;border-radius:26px;color:var(--ink);background:linear-gradient(160deg,#1A2178,#0E1248);box-shadow:0 40px 90px rgba(0,0,0,.65),0 0 0 1px var(--line);font-family:var(--font)}
+dialog[open]{animation:cardIn .4s cubic-bezier(.2,.8,.2,1)}
+dialog::backdrop{background:rgba(5,6,22,.7);backdrop-filter:blur(6px)}
+dialog form,#pwBody{padding:24px 24px 6px}
+dialog h3{font-size:19px;font-weight:800;margin-bottom:14px}
+.field.plain{animation:none;margin-bottom:14px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:480px){.two{grid-template-columns:1fr}}
+.dlg-actions{display:flex;justify-content:flex-end;gap:10px;padding:8px 24px 22px}
+.dlg-actions .btn{width:auto;animation:none}
+.note{color:var(--mut);font-size:13px;margin-bottom:12px}
+.note b{color:var(--lav)}
+textarea{width:100%;resize:vertical;border-radius:16px;border:1.5px solid var(--line);background:rgba(8,10,40,.6);color:var(--ink);font:500 14px/1.6 'Sora',monospace;padding:14px;outline:0}
+textarea:focus{border-color:var(--indigo);box-shadow:0 0 0 4px rgba(91,110,225,.22)}
+.log{margin-top:12px;max-height:200px;overflow:auto;padding:12px 14px;border-radius:14px;background:rgba(0,0,0,.28);font-size:13px;line-height:1.7}
+.log .ok{color:var(--ok)} .log .warn{color:#FFD27A} .log .bad{color:var(--bad)}
+.pwbox{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;border-radius:18px;background:rgba(8,10,40,.7);border:1.5px dashed var(--indigo);margin:6px 0 14px}
+.pwbox code{font:800 26px 'Sora',monospace;letter-spacing:.14em;color:#fff;word-break:break-all}
+.pwbox button{font:700 13px var(--font);padding:9px 14px;border-radius:11px;border:0;background:var(--indigo);color:#fff;cursor:pointer}
+.pwmeta{color:var(--mut);font-size:13px;margin-bottom:14px}
+.pwacts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.pwacts .wa{flex:1 1 140px}

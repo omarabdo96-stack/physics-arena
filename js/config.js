@@ -14,5 +14,6 @@ export const SITE = {
   // Paste the links here (inside the quotes). Leave empty until you have them.
   NEW_STUDENT_URL: "https://omarabdo96-stack.github.io/New-Student-Portal/",   // registration portal for new students
   EXAMS_URL: "https://omarabdo96-stack.github.io/Exam-Portal/",       // the separate exams platform
+  TEACHER_EMAIL: "omarabdo96@gmail.com",   // the only account allowed into the teacher dashboard
   WHATSAPP: "201550079074"
 };
