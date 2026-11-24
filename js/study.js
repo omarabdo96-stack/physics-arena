@@ -24,7 +24,7 @@ export function initStudy({ db, id, name }) {
   const yearKey = id[0];
   const root = $('#studyRoot'), viewer = $('#viewer'), vBody = $('#vBody');
   let weeks = null, loadedAt = 0, openIdx = 0, shown = [];
-  let player = null, tick = 0, wmTimer = 0;
+  let player = null, tick = 0, wmTimer = 0, shieldOn = true;
   const ac = new AbortController(), sig = { signal: ac.signal };   // lets us remove every listener on sign-out
 
   /* ---------- list ---------- */
@@ -74,6 +74,7 @@ export function initStudy({ db, id, name }) {
   function openItem(it) {
     if (it.type === 'assess') { window.open(it.ref, '_blank', 'noopener,noreferrer'); return; }
     $('#vTitle').textContent = it.title;
+    shieldOn = it.type !== 'sim';                 // simulations are interactive: no hide-on-blur there
     const label = `${id} - ${name}`.slice(0, 26);
     const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='300' height='190'><text x='24' y='110' transform='rotate(-22 150 95)' font-family='sans-serif' font-size='15' font-weight='700' fill='white' fill-opacity='0.14'>${label.replace(/[<>&'"]/g, '')}</text></svg>`;
     viewer.style.setProperty('--wm', `url("data:image/svg+xml,${encodeURIComponent(svg)}")`);
@@ -100,12 +101,13 @@ export function initStudy({ db, id, name }) {
 
   function buildVideo(it) {
     vBody.innerHTML = `<div class="vid" id="vid">
-      <div id="ytHost"></div>
-      <div class="vid-click" id="vidClick"></div>
-      <div class="vid-top"></div>
-      <div class="vid-mark"></div>
-      <div class="vid-end" id="vidEnd"><button type="button" id="vidReplay">Play again</button></div>
-      <div class="vid-load" id="vidLoad">Loading video...</div>
+      <div class="vid-stage">
+        <div id="ytHost"></div>
+        <div class="vid-click" id="vidClick"></div>
+        <div class="vid-mark"></div>
+        <div class="vid-end" id="vidEnd"><button type="button" id="vidReplay">Play again</button></div>
+        <div class="vid-load" id="vidLoad">Loading video...</div>
+      </div>
       <div class="vid-ctl">
         <button type="button" id="cPlay" aria-label="Play or pause"><svg viewBox="0 0 24 24" id="icPlay"><path d="M8 5v14l11-7z"/></svg></button>
         <input type="range" id="cSeek" min="0" max="1000" value="0" aria-label="Seek">
@@ -144,17 +146,28 @@ export function initStudy({ db, id, name }) {
     $('#cSeek').onchange = () => { dragging = false; };
     $('#cRate').onclick = () => { ri = (ri + 1) % rates.length; player.setPlaybackRate(rates[ri]); $('#cRate').textContent = rates[ri] + 'x'; };
     $('#cMute').onclick = () => { player.isMuted() ? player.unMute() : player.mute(); $('#cMute').classList.toggle('off', player.isMuted()); };
+    let idleT;
+    const setFs = on => { vid.classList.toggle('fs', on); wake(); };
+    const wake = () => {
+      vid.classList.remove('idle'); clearTimeout(idleT);
+      if (vid.classList.contains('fs')) idleT = setTimeout(() => vid.classList.add('idle'), 2200);
+    };
+    ['pointermove', 'pointerdown', 'touchstart'].forEach(ev => vid.addEventListener(ev, wake, { passive: true }));
+    const onFsChange = () => setFs((document.fullscreenElement || document.webkitFullscreenElement) === vid);
+    vid.addEventListener('fullscreenchange', onFsChange);
+    vid.addEventListener('webkitfullscreenchange', onFsChange);
     $('#cFull').onclick = () => {
       const fs = document.fullscreenElement || document.webkitFullscreenElement;
       if (fs) { (document.exitFullscreen || document.webkitExitFullscreen).call(document); return; }
+      if (vid.classList.contains('pseudo')) { vid.classList.remove('pseudo'); setFs(false); return; }
       const req = vid.requestFullscreen || vid.webkitRequestFullscreen;
-      if (req) req.call(vid); else vid.classList.toggle('pseudo');
+      if (req) req.call(vid); else { vid.classList.add('pseudo'); setFs(true); }
     };
   }
 
   /* ---------- protection (deterrents, not a vault) ---------- */
   const shield = $('#vShield');
-  const hideContent = () => { if (viewer.hidden) return; shield.classList.add('on'); try { player && player.pauseVideo && player.pauseVideo(); } catch { /* ignore */ } };
+  const hideContent = () => { if (viewer.hidden || !shieldOn) return; shield.classList.add('on'); try { player && player.pauseVideo && player.pauseVideo(); } catch { /* ignore */ } };
   const showContent = () => shield.classList.remove('on');
   document.addEventListener('visibilitychange', () => (document.hidden ? hideContent() : showContent()), sig);
   addEventListener('blur', hideContent, sig);
@@ -165,10 +178,10 @@ export function initStudy({ db, id, name }) {
   addEventListener('keydown', e => {
     if (viewer.hidden) return;
     if (e.key === 'Escape') { closeViewer(); return; }
-    if ((e.ctrlKey || e.metaKey) && ['s', 'p', 'u', 'c', 'a'].includes(e.key.toLowerCase())) e.preventDefault();
+    if (shieldOn && (e.ctrlKey || e.metaKey) && ['s', 'p', 'u', 'c', 'a'].includes(e.key.toLowerCase())) e.preventDefault();
   }, sig);
   addEventListener('keyup', e => {
-    if (viewer.hidden || e.key !== 'PrintScreen') return;
+    if (viewer.hidden || !shieldOn || e.key !== 'PrintScreen') return;
     try { navigator.clipboard.writeText(''); } catch { /* ignore */ }
     hideContent(); setTimeout(showContent, 1800);
   }, sig);
