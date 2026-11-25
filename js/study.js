@@ -20,57 +20,11 @@ function loadYT() {
   }));
 }
 
-export function initStudy({ db, id, name }) {
-  const yearKey = id[0];
-  const root = $('#studyRoot'), viewer = $('#viewer'), vBody = $('#vBody');
-  let weeks = null, loadedAt = 0, openIdx = 0, shown = [];
+export function createViewer({ id, name }) {
+  const viewer = $('#viewer'), vBody = $('#vBody');
   let player = null, tick = 0, wmTimer = 0, shieldOn = true;
   const ac = new AbortController(), sig = { signal: ac.signal };   // lets us remove every listener on sign-out
 
-  /* ---------- list ---------- */
-  async function open(force) {
-    if (!force && weeks && Date.now() - loadedAt < 5 * 60 * 1000) return;
-    root.innerHTML = '<div class="empty"><div class="orbit"><i></i><i></i></div><p>Loading your weeks...</p></div>';
-    try {
-      const snap = await getDoc(doc(db, 'content', yearKey));
-      weeks = snap.exists() ? (snap.data().weeks || []) : [];
-      loadedAt = Date.now(); render();
-    } catch {
-      weeks = null;
-      root.innerHTML = '<div class="empty"><p>Could not load your content.</p><small>Check your internet connection and press Refresh.</small></div>';
-    }
-  }
-  function render() {
-    shown = weeks.filter(w => w.visible !== false);
-    if (!shown.length) {
-      root.innerHTML = '<div class="empty"><div class="orbit"><i></i><i></i></div><p>Your weeks will appear here.</p><small>Mr Omar has not published any lessons yet.</small></div>';
-      return;
-    }
-    root.innerHTML = shown.map((w, wi) => `
-      <article class="sw ${wi === openIdx ? 'open' : ''}" data-w="${wi}">
-        <button type="button" class="sw-h" aria-expanded="${wi === openIdx}"><span>${esc(w.title)}</span><i class="chev"></i></button>
-        <div class="sw-b">
-          ${(w.lessons || []).map((l, li) => `
-            <div class="sl"><h4>${esc(l.title)}</h4>
-              ${TYPE_ORDER.map(t => {
-                const its = (l.items || []).map((it, ii) => [it, ii]).filter(([it]) => it.type === t);
-                return its.length ? `<div class="grp"><span class="grp-l">${TYPES[t].group} <i class="ar">${TYPES[t].groupAr}</i></span>
-                  <div class="its">${its.map(([it, ii]) => `<button type="button" class="it it-${t}" data-l="${li}" data-i="${ii}">${ICON[t]}<span>${esc(it.title)}</span>${t === 'assess' ? '<em>opens in a new tab</em>' : ''}</button>`).join('')}</div></div>` : '';
-              }).join('') || '<small class="none">No items yet.</small>'}
-            </div>`).join('') || '<small class="none">No lessons in this week yet.</small>'}
-        </div>
-      </article>`).join('');
-  }
-  root.addEventListener('click', e => {
-    const h = e.target.closest('.sw-h');
-    if (h) { const wi = +h.closest('.sw').dataset.w; openIdx = openIdx === wi ? -1 : wi; render(); return; }
-    const b = e.target.closest('button.it'); if (!b) return;
-    const w = shown[+b.closest('.sw').dataset.w], it = w.lessons[+b.dataset.l].items[+b.dataset.i];
-    openItem(it);
-  }, sig);
-  $('#studyRefresh').addEventListener('click', () => open(true), sig);
-
-  /* ---------- viewer ---------- */
   function openItem(it) {
     if (it.type === 'assess') { window.open(it.ref, '_blank', 'noopener,noreferrer'); return; }
     $('#vTitle').textContent = it.title;
@@ -186,5 +140,60 @@ export function initStudy({ db, id, name }) {
     hideContent(); setTimeout(showContent, 1800);
   }, sig);
 
-  return { open, close: closeViewer, dispose() { closeViewer(); ac.abort(); } };
+  return { openItem, close: closeViewer, dispose() { closeViewer(); ac.abort(); } };
+}
+
+// Weeks > lessons > items list, used by My Study and by an unlocked revision.
+export function mountWeeks({ root, viewer, sig, emptyHTML }) {
+  let shown = [], openIdx = 0;
+  function render(weeks) {
+    shown = (weeks || []).filter(w => w.visible !== false);
+    if (!shown.length) { root.innerHTML = emptyHTML; return; }
+    if (openIdx >= shown.length) openIdx = 0;
+    root.innerHTML = shown.map((w, wi) => `
+      <article class="sw ${wi === openIdx ? 'open' : ''}" data-w="${wi}">
+        <button type="button" class="sw-h" aria-expanded="${wi === openIdx}"><span>${esc(w.title)}</span><i class="chev"></i></button>
+        <div class="sw-b">
+          ${(w.lessons || []).map((l, li) => `
+            <div class="sl"><h4>${esc(l.title)}</h4>
+              ${TYPE_ORDER.map(t => {
+                const its = (l.items || []).map((it, ii) => [it, ii]).filter(([it]) => it.type === t);
+                return its.length ? `<div class="grp"><span class="grp-l">${TYPES[t].group} <i class="ar">${TYPES[t].groupAr}</i></span>
+                  <div class="its">${its.map(([it, ii]) => `<button type="button" class="it it-${t}" data-l="${li}" data-i="${ii}">${ICON[t]}<span>${esc(it.title)}</span>${t === 'assess' ? '<em>opens in a new tab</em>' : ''}</button>`).join('')}</div></div>` : '';
+              }).join('') || '<small class="none">No items yet.</small>'}
+            </div>`).join('') || '<small class="none">No lessons in this week yet.</small>'}
+        </div>
+      </article>`).join('');
+  }
+  root.addEventListener('click', e => {
+    const h = e.target.closest('.sw-h');
+    if (h) { const wi = +h.closest('.sw').dataset.w; openIdx = openIdx === wi ? -1 : wi; render(shown); return; }
+    const b = e.target.closest('button.it'); if (!b) return;
+    const w = shown[+b.closest('.sw').dataset.w];
+    viewer.openItem(w.lessons[+b.dataset.l].items[+b.dataset.i]);
+  }, sig);
+  return { render };
+}
+
+export function initStudy({ db, id, name, viewer }) {
+  const yearKey = id[0];
+  const root = $('#studyRoot');
+  let loaded = false, loadedAt = 0;
+  const ac = new AbortController(), sig = { signal: ac.signal };
+  const list = mountWeeks({ root, viewer, sig, emptyHTML: '<div class="empty"><div class="orbit"><i></i><i></i></div><p>Your weeks will appear here.</p><small>Mr Omar has not published any lessons yet.</small></div>' });
+
+  async function open(force) {
+    if (!force && loaded && Date.now() - loadedAt < 5 * 60 * 1000) return;
+    root.innerHTML = '<div class="empty"><div class="orbit"><i></i><i></i></div><p>Loading your weeks...</p></div>';
+    try {
+      const snap = await getDoc(doc(db, 'content', yearKey));
+      list.render(snap.exists() ? (snap.data().weeks || []) : []);
+      loaded = true; loadedAt = Date.now();
+    } catch {
+      loaded = false;
+      root.innerHTML = '<div class="empty"><p>Could not load your content.</p><small>Check your internet connection and press Refresh.</small></div>';
+    }
+  }
+  $('#studyRefresh').addEventListener('click', () => open(true), sig);
+  return { open, dispose() { ac.abort(); } };
 }

@@ -61,6 +61,8 @@
     <div class="seg" id="seg" role="tablist">
       <button type="button" class="on" data-view="students">Students <span class="ar">الطلاب</span></button>
       <button type="button" data-view="content">Study content <span class="ar">المحتوى</span></button>
+      <button type="button" data-view="revisions">Revisions <span class="ar">المراجعات</span></button>
+      <button type="button" data-view="announce">Announcements <span class="ar">الإعلانات</span></button>
     </div>
 
     <section class="block" id="studentsBlock">
@@ -80,6 +82,53 @@
       </div>
       <p class="note">Weeks hold lessons, lessons hold items (lecture videos, simulations, attachments, assessments). Students see the order you set here.</p>
       <div id="contentList" class="tree"></div>
+    </section>
+
+    <section class="block" id="revBlock" hidden>
+      <div class="toolbar">
+        <h3 id="revTitleH" style="margin:0;flex:1 1 200px">Online revisions</h3>
+        <button class="btn small primary" id="addRevBtn" type="button"><span class="btn-label">Add revision <span class="ar">إضافة مراجعة</span></span></button>
+      </div>
+      <p class="note">Paid revision sessions. Students see the name, price and payment details, and unlock the lessons with a one-time code you generate here. After unlocking, the lessons stay open for 3 weeks.</p>
+      <div class="field plain">
+        <label for="revPay">Payment details shown to students <span class="ar">طرق الدفع</span></label>
+        <textarea id="revPay" rows="3" placeholder="e.g. Vodafone Cash 010xxxxxxxx, InstaPay name@instapay. Send the payment screenshot on WhatsApp to get your code."></textarea>
+        <div class="dlg-actions" style="padding:8px 0 0"><button class="btn small ghost" id="revPaySave" type="button">Save payment details <span class="ar">حفظ</span></button></div>
+      </div>
+      <div class="pills tpills" id="revPicker"></div>
+      <div id="revEditor" hidden>
+        <div class="two">
+          <div class="field plain"><label for="revName">Revision name <span class="ar">الاسم</span></label><div class="inp"><input id="revName" autocomplete="off"></div></div>
+          <div class="field plain"><label for="revPrice">Price <span class="ar">السعر</span></label><div class="inp"><input id="revPrice" autocomplete="off" placeholder="e.g. 150 EGP"></div></div>
+        </div>
+        <div class="field plain"><label for="revDesc">Description (optional) <span class="ar">وصف</span></label><div class="inp"><input id="revDesc" autocomplete="off" placeholder="What the revision covers"></div></div>
+        <label class="chk"><input type="checkbox" id="revVis"> Visible to students (turn on when the content is ready)</label>
+        <div class="dlg-actions" style="padding:10px 0 4px">
+          <button class="btn small ghost" id="revDelete" type="button">Delete revision <span class="ar">حذف</span></button>
+          <button class="btn small primary" id="revSave" type="button"><span class="btn-label">Save details <span class="ar">حفظ</span></span></button>
+        </div>
+
+        <div class="toolbar sub-h"><h4 style="margin:0;flex:1">Content <span class="ar">المحتوى</span></h4><button class="btn small ghost" id="revAddWeek" type="button">Add week <span class="ar">إضافة أسبوع</span></button></div>
+        <div id="revTree" class="tree"></div>
+
+        <div class="toolbar sub-h"><h4 style="margin:0;flex:1">Access codes <span class="ar">أكواد الدخول</span></h4><small id="revCodeStats" class="stat-s"></small></div>
+        <div class="gen">
+          <div class="inp"><input id="revQty" type="number" min="1" max="50" value="1" aria-label="How many codes"></div>
+          <div class="inp"><input id="revFor" placeholder="For student ID (optional)" autocapitalize="characters" maxlength="6"></div>
+          <button class="btn small primary" id="revGen" type="button"><span class="btn-label">Generate <span class="ar">توليد</span></span></button>
+        </div>
+        <small class="hint">Leave the ID empty to make a batch of codes anyone can use once. Fill the ID to make one code for that student with WhatsApp buttons.</small>
+        <div id="revCodes" class="codes"></div>
+      </div>
+    </section>
+
+    <section class="block" id="annBlock" hidden>
+      <div class="toolbar">
+        <h3 id="annTitleH" style="margin:0;flex:1 1 200px">Announcements</h3>
+        <button class="btn small primary" id="newAnnBtn" type="button"><span class="btn-label">New announcement <span class="ar">إعلان جديد</span></span></button>
+      </div>
+      <p class="note">These appear on the Home tab of every student in the selected year. Pinned and important ones stand out.</p>
+      <div id="annList" class="list"></div>
     </section>
   </main>
 </div>
@@ -144,6 +193,19 @@
     <div class="field plain"><label for="itUrl">Link <span class="ar">الرابط</span></label><div class="inp"><input id="itUrl" type="url" autocomplete="off" placeholder="https://"></div><small class="hint" id="itHint"></small></div>
     <p class="err" id="itemErr" hidden></p>
     <div class="dlg-actions"><button class="btn small ghost" type="button" id="itemCancel">Cancel <span class="ar">إلغاء</span></button><button class="btn small primary" type="submit"><span class="btn-label">Save <span class="ar">حفظ</span></span></button></div>
+  </form>
+</dialog>
+
+<dialog id="dlgAnn">
+  <form id="annForm" novalidate>
+    <h3 id="annDlgTitle">New announcement</h3>
+    <div class="field plain"><label for="annTitleIn">Title (optional) <span class="ar">العنوان</span></label><div class="inp"><input id="annTitleIn" autocomplete="off"></div></div>
+    <div class="field plain"><label for="annBody">Message <span class="ar">النص</span></label><textarea id="annBody" rows="5" placeholder="Write the announcement"></textarea></div>
+    <label class="chk"><input type="checkbox" id="annImp"> Important (highlighted)</label>
+    <label class="chk"><input type="checkbox" id="annPin"> Pin to the top</label>
+    <label class="chk" id="annAllRow"><input type="checkbox" id="annAll"> Post to all three years</label>
+    <p class="err" id="annErr" hidden></p>
+    <div class="dlg-actions"><button class="btn small ghost" type="button" id="annCancel">Cancel <span class="ar">إلغاء</span></button><button class="btn small primary" type="submit"><span class="btn-label">Post <span class="ar">نشر</span></span></button></div>
   </form>
 </dialog>
 

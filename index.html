@@ -12,6 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/study.css">
+<link rel="stylesheet" href="css/marks.css">
 </head>
 <body>
 <canvas id="bg" aria-hidden="true"></canvas>
@@ -96,7 +97,7 @@
       </div>
       <div class="block">
         <h3>Latest news <span class="ar">آخر الأخبار</span></h3>
-        <div class="empty"><div class="orbit"><i></i><i></i></div><p>No news yet.</p><small>Important updates from Mr Omar will show up here.</small></div>
+        <div id="newsRoot"><div class="empty"><div class="orbit"><i></i><i></i></div><p>No news yet.</p><small>Important updates from Mr Omar will show up here.</small></div></div>
       </div>
     </section>
 
@@ -109,8 +110,8 @@
 
     <section class="panel" id="panel-marks" role="tabpanel" hidden>
       <div class="block">
-        <h3>My Marks <span class="ar">درجاتي</span></h3>
-        <div class="empty"><div class="orbit"><i></i><i></i></div><p>No marks uploaded yet.</p><small>Your weekly marks, totals and rank will show here after Mr Omar updates them.</small></div>
+        <div class="study-head"><h3>My Marks <span class="ar">درجاتي</span></h3><button type="button" class="btn small ghost" id="marksRefresh">Refresh <span class="ar">تحديث</span></button></div>
+        <div id="marksRoot"></div>
       </div>
     </section>
 
@@ -124,8 +125,8 @@
 
     <section class="panel" id="panel-revisions" role="tabpanel" hidden>
       <div class="block">
-        <h3>Online Revisions <span class="ar">المراجعات أونلاين</span></h3>
-        <div class="empty"><div class="orbit"><i></i><i></i></div><p>No revisions open yet.</p><small>Paid revision sessions, prices and the code box will appear here.</small></div>
+        <div class="study-head"><h3>Online Revisions <span class="ar">المراجعات أونلاين</span></h3><button type="button" class="btn small ghost" id="revRefresh">Refresh <span class="ar">تحديث</span></button></div>
+        <div id="revRoot"></div>
       </div>
     </section>
 

@@ -83,3 +83,33 @@ textarea:focus{border-color:var(--indigo);box-shadow:0 0 0 4px rgba(91,110,225,.
 select{width:100%;background:none;border:0;outline:0;color:var(--ink);font:600 15px var(--font);padding:14px 16px}
 select option{background:#10154a;color:#fff}
 .inp input[type=url]{letter-spacing:0;font-size:15px}
+
+/* revisions + announcements */
+.tpills{justify-content:flex-start;margin:6px 0 14px}
+.chk{display:flex;align-items:center;gap:9px;margin:8px 0;font-size:13.5px;color:var(--lav);cursor:pointer}
+.chk input{width:18px;height:18px;accent-color:var(--pink)}
+.sub-h{margin:22px 0 10px;padding-top:16px;border-top:1px solid var(--line)}
+.stat-s{color:var(--mut);font-size:12.5px}
+.gen{display:grid;grid-template-columns:90px 1fr auto;gap:10px;align-items:center;margin-bottom:6px}
+.gen .btn{width:auto;animation:none}
+.gen .inp input{font-size:15px;letter-spacing:.04em;padding:12px 14px}
+.codes{display:grid;gap:8px;margin-top:12px}
+.code{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+.code.used{opacity:.6}
+.code code{font:800 17px 'Sora',monospace;letter-spacing:.12em;color:#fff}
+.code .st{flex:1 1 140px;color:var(--mut);font-size:12.5px}
+.ctl a.wa{font:600 12px var(--font);padding:6px 10px;border-radius:10px;border:1px solid rgba(91,227,168,.4);color:#9BF2CB;text-decoration:none}
+.ctl a.wa.parent{border-color:rgba(255,98,144,.45);color:#FFB5CB}
+.ann{padding:14px 16px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid var(--line);display:grid;gap:8px}
+.ann.imp{border-color:rgba(255,98,144,.5);background:rgba(255,98,144,.07)}
+.ann header{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ann header small{margin-inline-start:auto;color:var(--mut);font-size:12px}
+.ann p{white-space:pre-wrap;color:var(--lav);font-size:14px}
+.ann .ctl{justify-content:flex-end}
+.tag.pin{background:rgba(91,110,225,.3);color:#fff}
+@media (max-width:560px){.gen{grid-template-columns:1fr 1fr}.gen .btn{grid-column:1/-1}}
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.pill{font:700 13.5px var(--font);padding:9px 16px;border-radius:99px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--mut);cursor:pointer;transition:.25s}
+.pill:hover{color:#fff;border-color:var(--indigo)}
+.pill.on{color:#fff;border-color:transparent;background:linear-gradient(110deg,var(--indigo-deep),var(--indigo) 60%,#8A63F0);box-shadow:0 8px 22px -8px rgba(91,110,225,.9)}
+#revPicker .nothing{width:100%}

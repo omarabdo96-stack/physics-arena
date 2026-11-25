@@ -8,6 +8,9 @@ service cloud.firestore {
     }
     // a student's ID is the part of the email before @  (t156@physicsarena.app -> T156)
     function myId() { return request.auth.token.email.split('@')[0].upper(); }
+    function isActiveStudent() {
+      return signedIn() && get(/databases/$(database)/documents/students/$(myId())).data.active == true;
+    }
 
     // public-facing student record: name, year, active
     match /students/{id} {
@@ -28,6 +31,76 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/students/$(myId())).data.active == true
       );
       allow write: if isTeacher();
+    }
+
+    // marks: one document per student, uploaded by the teacher's Update button
+    match /marks/{id} {
+      allow read: if isTeacher() || (
+        signedIn()
+        && myId() == id
+        && get(/databases/$(database)/documents/students/$(myId())).data.active == true
+      );
+      allow write: if isTeacher();
+    }
+
+    // announcements (Home tab news) and the revision catalog: one document per year, students read their own year
+    match /announcements/{year} {
+      allow read: if isTeacher() || (isActiveStudent() && myId()[0:1] == year);
+      allow write: if isTeacher();
+    }
+    match /revisions_public/{year} {
+      allow read: if isTeacher() || (isActiveStudent() && myId()[0:1] == year);
+      allow write: if isTeacher();
+    }
+
+    // revision lessons: readable only while the student has an unexpired redemption for that revision
+    match /revision_content/{revId} {
+      allow read: if isTeacher() || (
+        isActiveStudent()
+        && exists(/databases/$(database)/documents/redemptions/$(myId() + '_' + revId))
+        && get(/databases/$(database)/documents/redemptions/$(myId() + '_' + revId)).data.expiresAtMs > request.time.toMillis()
+      );
+      allow write: if isTeacher();
+    }
+
+    // one-time access codes made by the teacher. A student can read one code by its exact text and mark it used (once).
+    match /revision_codes/{code} {
+      allow get: if isTeacher() || (isActiveStudent() && resource.data.get('forId', '') in ['', myId()]);
+      allow list: if isTeacher();
+      allow create, delete: if isTeacher();
+      allow update: if isTeacher() || (
+        isActiveStudent()
+        && resource.data.used == false
+        && resource.data.get('forId', '') in ['', myId()]
+        && request.resource.data.used == true
+        && request.resource.data.usedBy == myId()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['used', 'usedBy', 'usedAtMs'])
+      );
+    }
+
+    // a redemption = this student unlocked this revision for 3 weeks. It can only be created together with marking a valid code used.
+    match /redemptions/{rid} {
+      allow read: if isTeacher() || (isActiveStudent() && resource.data.id == myId());
+      allow delete: if isTeacher();
+      allow create: if isTeacher() || validRedemption(rid);
+      allow update: if isTeacher() || (validRedemption(rid) && resource.data.expiresAtMs <= request.time.toMillis());
+    }
+    function validRedemption(rid) {
+      let d = request.resource.data;
+      let codePath = /databases/$(database)/documents/revision_codes/$(d.code);
+      return isActiveStudent()
+        && d.keys().hasOnly(['id', 'revId', 'code', 'year', 'redeemedAtMs', 'expiresAtMs'])
+        && d.id == myId()
+        && rid == myId() + '_' + d.revId
+        && d.year == myId()[0:1]
+        && get(codePath).data.used == false
+        && get(codePath).data.revId == d.revId
+        && get(codePath).data.year == d.year
+        && getAfter(codePath).data.used == true
+        && getAfter(codePath).data.usedBy == myId()
+        && d.redeemedAtMs >= request.time.toMillis() - 120000
+        && d.redeemedAtMs <= request.time.toMillis() + 120000
+        && d.expiresAtMs == d.redeemedAtMs + 1814400000;
     }
 
     // everything else is closed until we open it for a feature

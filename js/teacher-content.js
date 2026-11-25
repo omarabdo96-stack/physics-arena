@@ -3,22 +3,21 @@ import { TYPES, TYPE_ORDER, uid, buildItem } from './content.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const YEAR_NAMES = { B: '1st Secondary', C: '2nd Secondary', T: '3rd Secondary' };
 const shortUrl = it => (it.type === 'video' ? `youtu.be/${it.ref}` : it.ref.replace(/^https:\/\//, '')).slice(0, 52);
 
-export function createContentManager({ db, toast }) {
-  const data = {};              // year -> { weeks: [...] }
-  let year = 'T';
-  const root = $('#contentList');
+// Generic weeks > lessons > items editor. Used for My Study (collection 'content', key = year)
+// and for each paid revision (collection 'revision_content', key = revision id).
+export function createTreeManager({ db, toast, root, collection }) {
+  const data = {};              // key -> { weeks: [...] }
+  let key = '';
 
   /* ----- load / save ----- */
   async function load(y) {
-    year = y;
-    $('#contentTitle').textContent = `Study content, ${YEAR_NAMES[y]}`;
+    key = y;
     if (!data[y]) {
       root.innerHTML = '<div class="nothing">Loading...</div>';
       try {
-        const snap = await getDoc(doc(db, 'content', y));
+        const snap = await getDoc(doc(db, collection, y));
         data[y] = { weeks: snap.exists() ? (snap.data().weeks || []) : [] };
       } catch {
         root.innerHTML = '<div class="nothing">Could not load the content. Check the Firestore rules (see firestore.rules) and press Refresh.</div>';
@@ -28,10 +27,10 @@ export function createContentManager({ db, toast }) {
     render();
   }
   async function save() {
-    try { await setDoc(doc(db, 'content', year), { weeks: data[year].weeks, updatedAt: serverTimestamp() }); toast('Saved'); }
-    catch { toast('Could not save. Check your connection.'); delete data[year]; load(year); }
+    try { await setDoc(doc(db, collection, key), { weeks: data[key].weeks, updatedAt: serverTimestamp() }); toast('Saved'); }
+    catch { toast('Could not save. Check your connection.'); delete data[key]; load(key); }
   }
-  const weeks = () => data[year].weeks;
+  const weeks = () => data[key].weeks;
   const move = (arr, i, d) => { const j = i + d; if (j < 0 || j >= arr.length) return false; [arr[i], arr[j]] = [arr[j], arr[i]]; return true; };
 
   /* ----- small dialogs ----- */
@@ -80,7 +79,7 @@ export function createContentManager({ db, toast }) {
   const btn = (act, label, extra = '') => `<button type="button" data-act="${act}" ${extra} aria-label="${label}">${label === 'Up' ? '&uarr;' : label === 'Down' ? '&darr;' : label}</button>`;
   function render() {
     const W = weeks();
-    if (!W.length) { root.innerHTML = `<div class="nothing">No weeks yet for ${YEAR_NAMES[year]}. Press "Add week" to start.</div>`; return; }
+    if (!W.length) { root.innerHTML = '<div class="nothing">No weeks yet. Press "Add week" to start.</div>'; return; }
     root.innerHTML = W.map((w, wi) => `
       <article class="week ${w.visible === false ? 'hid' : ''}" data-w="${wi}">
         <header class="wk-h">
@@ -126,12 +125,12 @@ export function createContentManager({ db, toast }) {
     if (changed) { render(); await save(); }
   });
 
-  $('#addWeekBtn').addEventListener('click', async () => {
-    if (!data[year]) return;
+  async function addWeek() {
+    if (!data[key]) return;
     const n = weeks().length + 1;
     const t = await askText('Add week', 'Week name', `Week ${n}`);
     if (t) { weeks().push({ id: uid(), title: t, visible: true, lessons: [] }); render(); await save(); }
-  });
+  }
 
-  return { load, reload: y => { delete data[y]; return load(y); } };
+  return { load, addWeek, reload: y => { delete data[y]; return load(y); } };
 }

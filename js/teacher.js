@@ -1,7 +1,9 @@
 import { firebaseConfig, SITE } from './config.js';
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
-import { createContentManager } from './teacher-content.js';
+import { createTreeManager } from './teacher-content.js';
+import { createAnnouncements } from './teacher-announcements.js';
+import { createRevisions } from './teacher-revisions.js';
 import { getFirestore, doc, getDoc, getDocs, collection, writeBatch, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -54,7 +56,32 @@ Link: ${site}
   return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
 }
 
-const content = createContentManager({ db, toast });
+const content = createTreeManager({ db, toast, root: $('#contentList'), collection: 'content' });
+const announcements = createAnnouncements({ db, toast });
+function codeWa(kind, studentId, code, title) {                 // WhatsApp link that sends a revision code to a student or parent
+  const s = students.find(x => x.id === studentId), p = priv[studentId] || {};
+  const phone = normPhone(kind === 'parent' ? p.parentPhone : p.studentPhone);
+  if (!s || !phone) return '';
+  const site = new URL('./', location.href).href;
+  const who = kind === 'parent' ? `ولي أمر الطالب ${s.name}` : s.name;
+  const text = `أهلاً ${who} 👋
+كود مراجعة "${title}" على منصة Physics Arena:
+${code}
+ادخل المنصة ثم تاب Online Revisions واكتب الكود. الكود يُستخدم مرة واحدة ويفتح المراجعة لمدة 3 أسابيع.
+${site}
+
+Hello! Your Physics Arena revision code for "${title}": ${code}
+Open the Online Revisions tab and type it in. It works once and keeps the lessons open for 3 weeks.
+- Mr Omar Abd alhady`;
+  return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+}
+const revisions = createRevisions({ db, toast, studentExists: id => students.some(s => s.id === id), codeWa });
+const YEAR_LABEL = { B: '1st Secondary', C: '2nd Secondary', T: '3rd Secondary' };
+function loadView(y) {
+  if (view === 'content') { $('#contentTitle').textContent = `Study content, ${YEAR_LABEL[y]}`; content.load(y); }
+  else if (view === 'revisions') revisions.load(y);
+  else if (view === 'announce') announcements.load(y);
+}
 
 /* ---------- sign in / out ---------- */
 const loginView = $('#loginView'), appView = $('#appView'), loginBtn = $('#loginBtn'), errBox = $('#loginErr');
@@ -97,7 +124,7 @@ async function loadAll() {
       : 'Could not load students. Check your connection and press Refresh.';
   }
 }
-$('#refreshBtn').addEventListener('click', async () => { await loadAll(); if (view === 'content') await content.reload(year); toast('Refreshed'); });
+$('#refreshBtn').addEventListener('click', async () => { await loadAll(); if (view === 'content') { await content.reload(year); $('#contentTitle').textContent = `Study content, ${YEAR_LABEL[year]}`; } else if (view === 'revisions') await revisions.reload(year); else if (view === 'announce') await announcements.reload(year); toast('Refreshed'); });
 
 /* ---------- tabs ---------- */
 const tabs = $('#tabs'), ink = $('#tabInk');
@@ -107,7 +134,7 @@ function showYear(y, first) {
   const btn = $(`.tab[data-year="${y}"]`);
   requestAnimationFrame(() => { ink.style.width = btn.offsetWidth + 'px'; ink.style.transform = `translateX(${btn.offsetLeft}px)`; });
   if (!first) { render(); }
-  if (view === 'content' && !first) content.load(y);
+  if (view !== 'students' && !first) loadView(y);
 }
 tabs.addEventListener('click', e => { const b = e.target.closest('.tab'); if (b) showYear(b.dataset.year); });
 addEventListener('resize', () => showYear(year, true));
@@ -258,12 +285,15 @@ $('#bulkForm').addEventListener('submit', async e => {
   bulkRun.classList.remove('loading'); render();
 });
 
-/* ---------- Students / Study content switch ---------- */
+/* ---------- Students / Study content / Revisions / Announcements switch ---------- */
 $('#seg').addEventListener('click', e => {
   const b = e.target.closest('button[data-view]'); if (!b) return;
   view = b.dataset.view;
   $$('#seg button').forEach(x => x.classList.toggle('on', x === b));
   $('#studentsBlock').hidden = view !== 'students';
   $('#contentBlock').hidden = view !== 'content';
-  if (view === 'content') content.load(year);
+  $('#revBlock').hidden = view !== 'revisions';
+  $('#annBlock').hidden = view !== 'announce';
+  if (view !== 'students') loadView(year);
 });
+$('#addWeekBtn').addEventListener('click', () => content.addWeek());
