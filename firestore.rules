@@ -103,6 +103,19 @@ service cloud.firestore {
         && d.expiresAtMs == d.redeemedAtMs + 1814400000;
     }
 
+    // activity (videos finished, items opened, visiting days) and unlocked trophies: each student writes only their own
+    match /progress/{id} {
+      allow read: if isTeacher() || (isActiveStudent() && myId() == id);
+      allow write: if isActiveStudent() && myId() == id
+        && request.resource.data.keys().hasOnly(['videos', 'opened', 'loginDays', 'flags', 'updatedAtMs'])
+        && request.resource.data.get('loginDays', []).size() <= 400;
+    }
+    match /trophies/{id} {
+      allow read: if isTeacher() || (isActiveStudent() && myId() == id);
+      allow write: if isActiveStudent() && myId() == id
+        && request.resource.data.keys().hasOnly(['unlocked', 'updatedAtMs']);
+    }
+
     // everything else is closed until we open it for a feature
     match /{document=**} {
       allow read, write: if false;

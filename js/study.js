@@ -20,12 +20,13 @@ function loadYT() {
   }));
 }
 
-export function createViewer({ id, name }) {
+export function createViewer({ id, name, tracker }) {
   const viewer = $('#viewer'), vBody = $('#vBody');
   let player = null, tick = 0, wmTimer = 0, shieldOn = true;
   const ac = new AbortController(), sig = { signal: ac.signal };   // lets us remove every listener on sign-out
 
   function openItem(it) {
+    tracker && tracker.opened(it);
     if (it.type === 'assess') { window.open(it.ref, '_blank', 'noopener,noreferrer'); return; }
     $('#vTitle').textContent = it.title;
     shieldOn = it.type !== 'sim';                 // simulations are interactive: no hide-on-blur there
@@ -67,10 +68,11 @@ export function createViewer({ id, name }) {
         <input type="range" id="cSeek" min="0" max="1000" value="0" aria-label="Seek">
         <span class="time" id="cTime">0:00</span>
         <button type="button" id="cRate" class="txt" aria-label="Speed">1x</button>
+        <div class="qwrap"><button type="button" id="cQual" class="txt" aria-label="Video quality">720p</button><div class="qmenu" id="qMenu" hidden></div></div>
         <button type="button" id="cMute" aria-label="Mute"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/></svg></button>
         <button type="button" id="cFull" aria-label="Fullscreen"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
       </div></div>`;
-    const vid = $('#vid'), rates = [1, 1.25, 1.5, 1.75, 2, 0.75]; let ri = 0, dragging = false;
+    const vid = $('#vid'), rates = [1, 1.25, 1.5, 1.75, 2, 0.75]; let ri = 0, dragging = false, qApplied = false, wanted = 'hd720';
     loadYT().then(() => {
       if (viewer.hidden || !$('#ytHost')) return;
       player = new YT.Player('ytHost', {
@@ -83,6 +85,8 @@ export function createViewer({ id, name }) {
             vid.classList.toggle('paused', s === 2 || s === 5 || s === -1);
             vid.classList.toggle('ended', s === 0);
             $('#icPlay').innerHTML = s === 1 ? '<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>' : '<path d="M8 5v14l11-7z"/>';
+            if (s === 1) { if (!qApplied) { qApplied = true; applyQuality(); } setTimeout(showQuality, 1600); }
+            if (s === 0 && tracker) tracker.videoDone(it);
           }
         }
       });
@@ -92,13 +96,35 @@ export function createViewer({ id, name }) {
       const cur = player.getCurrentTime(), dur = player.getDuration() || 0;
       if (!dragging && dur) $('#cSeek').value = Math.round(cur / dur * 1000);
       $('#cTime').textContent = `${fmt(cur)} / ${fmt(dur)}`;
+      if (tracker && dur > 30 && cur / dur >= 0.9) tracker.videoDone(it);
     }
     const toggle = () => { if (!player || !player.getPlayerState) return; player.getPlayerState() === 1 ? player.pauseVideo() : player.playVideo(); };
     $('#vidClick').onclick = toggle; $('#cPlay').onclick = toggle;
-    $('#vidReplay').onclick = () => { player.seekTo(0, true); player.playVideo(); };
+    $('#vidReplay').onclick = () => { tracker && tracker.flag('replay'); player.seekTo(0, true); player.playVideo(); };
     $('#cSeek').oninput = e => { dragging = true; const d = player.getDuration() || 0; player.seekTo(d * e.target.value / 1000, true); };
     $('#cSeek').onchange = () => { dragging = false; };
-    $('#cRate').onclick = () => { ri = (ri + 1) % rates.length; player.setPlaybackRate(rates[ri]); $('#cRate').textContent = rates[ri] + 'x'; };
+    $('#cRate').onclick = () => { ri = (ri + 1) % rates.length; player.setPlaybackRate(rates[ri]); $('#cRate').textContent = rates[ri] + 'x'; if (rates[ri] >= 2 && tracker) tracker.flag('speed'); };
+    /* quality: defaults to 720p; the student can pick another level (YouTube may still lower it on a slow connection) */
+    const QLABEL = { highres: '4K', hd2160: '4K', hd1440: '1440p', hd1080: '1080p', hd720: '720p', large: '480p', medium: '360p', small: '240p', tiny: '144p', default: 'Auto', auto: 'Auto' };
+    function applyQuality() { try { player.setPlaybackQuality(wanted); } catch { /* ignore */ } }
+    function showQuality() {
+      try { const q = player.getPlaybackQuality(); $('#cQual').textContent = (wanted === 'default' ? 'Auto ' : '') + (QLABEL[q] || QLABEL[wanted] || 'Auto'); } catch { /* ignore */ }
+    }
+    $('#cQual').onclick = e => {
+      e.stopPropagation();
+      const menu = $('#qMenu');
+      if (!menu.hidden) { menu.hidden = true; return; }
+      let levels = []; try { levels = (player.getAvailableQualityLevels() || []).filter(l => QLABEL[l] && l !== 'auto' && l !== 'default'); } catch { /* ignore */ }
+      if (!levels.length) levels = ['hd1080', 'hd720', 'large', 'medium', 'small'];
+      menu.innerHTML = [...levels, 'default'].map(l => `<button type="button" data-q="${l}" class="${l === wanted ? 'on' : ''}">${QLABEL[l]}</button>`).join('') + '<small>Higher quality needs a faster connection.</small>';
+      menu.hidden = false;
+    };
+    $('#qMenu').onclick = e => {
+      const b = e.target.closest('button[data-q]'); if (!b) return;
+      wanted = b.dataset.q; applyQuality(); $('#qMenu').hidden = true;
+      $('#cQual').textContent = QLABEL[wanted]; setTimeout(showQuality, 1800);
+    };
+    vid.addEventListener('pointerdown', e => { if (!e.target.closest('.qwrap')) $('#qMenu').hidden = true; });
     $('#cMute').onclick = () => { player.isMuted() ? player.unMute() : player.mute(); $('#cMute').classList.toggle('off', player.isMuted()); };
     let idleT;
     const setFs = on => { vid.classList.toggle('fs', on); wake(); };

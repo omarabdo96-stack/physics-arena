@@ -88,17 +88,31 @@
 .none{display:block;text-align:center}
 .study-head{justify-content:center;flex-wrap:wrap;gap:12px 18px}
 
-/* Home news */
+/* Home news: professional announcement cards */
+.news-top{display:flex;align-items:center;justify-content:space-between;margin:0 2px 12px;color:var(--mut);font-size:13px;font-weight:600}
 .news{display:grid;gap:12px}
-.nw{padding:16px 18px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid var(--line);display:grid;gap:8px;animation:panelIn .5s both}
-.nw.imp{border-color:rgba(255,98,144,.55);background:linear-gradient(160deg,rgba(255,98,144,.12),rgba(255,98,144,.04))}
-.nw.pin:not(.imp){border-color:rgba(91,110,225,.6)}
+.nw{position:relative;display:grid;grid-template-columns:48px 1fr;gap:16px;padding:18px 20px;border-radius:20px;background:linear-gradient(160deg,rgba(24,30,92,.55),rgba(12,15,52,.6));border:1px solid var(--line);border-inline-start:4px solid var(--indigo);animation:panelIn .5s both;transition:transform .25s,border-color .25s}
+.nw:hover{transform:translateY(-2px)}
+.nw.pin{border-inline-start-color:#8A63F0}
+.nw.imp{border-color:rgba(255,98,144,.4);border-inline-start-color:var(--pink);background:linear-gradient(160deg,rgba(255,98,144,.14),rgba(12,15,52,.6))}
+.nw.fresh{box-shadow:0 0 0 1px rgba(255,98,144,.25),0 14px 34px -16px rgba(255,98,144,.55)}
+.nw.hero{padding:24px 24px 22px;background:linear-gradient(135deg,rgba(91,110,225,.28),rgba(138,99,240,.16) 55%,rgba(255,98,144,.12))}
+.nw.hero.imp{background:linear-gradient(135deg,rgba(255,98,144,.26),rgba(138,99,240,.14))}
+.nw.hero h4{font-size:21px}
+.nw-ic{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;background:rgba(91,110,225,.28);color:#fff}
+.nw.imp .nw-ic{background:rgba(255,98,144,.3)} .nw.pin .nw-ic{background:rgba(138,99,240,.35)}
+.nw-ic svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nw-bd{min-width:0;display:grid;gap:8px}
 .nw header{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .nw time{margin-inline-start:auto;color:var(--mut);font-size:12px}
-.nw h4{font-size:16.5px}
-.nw p{white-space:pre-wrap;color:var(--lav);font-size:14.5px;line-height:1.65}
-.nt{font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,.12)}
-.nt.imp{background:rgba(255,98,144,.3);color:#FFD0DE} .nt.pin{background:rgba(91,110,225,.35)} .nt.new{background:linear-gradient(90deg,var(--indigo),var(--pink));color:#fff}
+.nw h4{font-size:17px;line-height:1.35}
+.nw p{white-space:pre-wrap;color:var(--lav);font-size:14.5px;line-height:1.7;word-break:break-word}
+.nw p.clamp{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.nw p a{color:#9DB0FF;text-decoration:underline;text-underline-offset:3px}
+.nw .more{justify-self:start;background:none;border:0;color:#9DB0FF;font:700 13px var(--font);cursor:pointer;padding:0}
+.nt{font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,.12);letter-spacing:.02em}
+.nt.imp{background:rgba(255,98,144,.3);color:#FFD0DE} .nt.pin{background:rgba(138,99,240,.4)} .nt.new{background:linear-gradient(90deg,var(--indigo),var(--pink));color:#fff}
+@media (max-width:560px){.nw{grid-template-columns:1fr;gap:10px;padding:16px}.nw-ic{width:40px;height:40px}}
 
 /* Online Revisions */
 #revRoot{display:grid;gap:16px}
@@ -129,3 +143,11 @@
 .rv-top .btn{width:auto;animation:none}
 .rv-top h3{margin:0 0 4px}
 @media (max-width:560px){.rv-row{flex-direction:column}.rv-row .btn{width:100%}}
+
+/* video quality menu */
+.vid-ctl .qwrap{position:relative;flex:none}
+.qmenu{position:absolute;bottom:48px;right:0;min-width:128px;display:grid;gap:4px;padding:8px;border-radius:14px;background:#10154A;border:1px solid var(--line);box-shadow:0 18px 40px rgba(0,0,0,.55);z-index:9}
+.qmenu button{min-width:0!important;height:auto!important;padding:9px 12px;border-radius:9px!important;background:transparent!important;color:var(--lav);font:600 13px var(--font);text-align:start;display:block!important}
+.qmenu button:hover{background:rgba(91,110,225,.35)!important;color:#fff}
+.qmenu button.on{background:linear-gradient(90deg,var(--indigo),#8A63F0)!important;color:#fff}
+.qmenu small{display:block;padding:6px 8px 2px;color:var(--mut);font-size:11px;max-width:150px}

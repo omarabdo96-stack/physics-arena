@@ -101,6 +101,7 @@ export function initRevisions({ db, id, name, viewer }) {
       await b.commit();
     } catch { return { kind: 'bad', text: 'Could not unlock. The code may have just been used, or your current access is still running.' }; }
     reds[cd.revId] = { id, revId: cd.revId, code, redeemedAtMs: now, expiresAtMs: now + ACCESS_MS };
+    dispatchEvent(new CustomEvent('pa:redeemed'));
     return { kind: 'ok', text: 'Unlocked! The lessons are open for 3 weeks.', revId: cd.revId };
   }
 

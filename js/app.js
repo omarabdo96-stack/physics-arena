@@ -5,6 +5,10 @@ import { createViewer, initStudy } from './study.js';
 import { initMarks } from './marks.js';
 import { initHome } from './home.js';
 import { initRevisions } from './revisions.js';
+import { createData } from './data.js';
+import { createTracker } from './tracker.js';
+import { createTrophyCase } from './achievements.js';
+import { initParent } from './parent.js';
 import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -25,8 +29,13 @@ const db = getFirestore(fb);
 /* ---------- Helpers ---------- */
 const loginView = $('#loginView'), appView = $('#appView');
 const sid = $('#sid'), pw = $('#pw'), errBox = $('#loginErr'), loginBtn = $('#loginBtn');
-let toastTimer, viewer = null, study = null, marks = null, home = null, revs = null;
-function disposeAll() { [study, marks, home, revs, viewer].forEach(x => x && x.dispose()); study = marks = home = revs = viewer = null; }
+let toastTimer, viewer = null, study = null, marks = null, home = null, revs = null, data = null, tracker = null, ach = null, parent = null;
+const onRedeemed = () => { data && data.drop('reds'); ach && ach.refresh(false); };
+function disposeAll() {
+  [study, marks, home, revs, ach, parent, tracker, viewer].forEach(x => x && x.dispose());
+  study = marks = home = revs = ach = parent = tracker = viewer = data = null;
+  removeEventListener('pa:redeemed', onRedeemed);
+}
 function toast(msg) {
   const t = $('#toast');
   t.textContent = msg; t.classList.add('show');
@@ -121,11 +130,17 @@ onAuthStateChanged(auth, async user => {
 
 function enterApp(id, name) {
   disposeAll();
-  viewer = createViewer({ id, name });
+  data = createData({ db, id });
+  tracker = createTracker({ db, id });
+  viewer = createViewer({ id, name, tracker });
   study = initStudy({ db, id, name, viewer });
   marks = initMarks({ db, id });
-  home = initHome({ db, id });
+  home = initHome({ data, id });
   revs = initRevisions({ db, id, name, viewer });
+  ach = createTrophyCase({ db, id, data, tracker });
+  parent = initParent({ data, tracker, ach, id, name });
+  addEventListener('pa:redeemed', onRedeemed);
+  tracker.load().then(() => ach && ach.refresh(true));
   const y = YEARS[id[0]];
   $('#chipId').textContent = id;
   $('#chipYear').textContent = y ? y.short : '';
@@ -154,6 +169,8 @@ function showTab(name, push = true) {
   if (name === 'marks' && marks) marks.open();
   if (name === 'home' && home) home.open();
   if (name === 'revisions' && revs) revs.open();
+  if (name === 'achievements' && ach) ach.open();
+  if (name === 'parent' && parent) parent.open();
   if (push) history.replaceState(null, '', '#' + name);
 }
 tabs.addEventListener('click', e => { const b = e.target.closest('.tab'); if (b) showTab(b.dataset.tab); });
