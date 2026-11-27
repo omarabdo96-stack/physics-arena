@@ -48,6 +48,11 @@ service cloud.firestore {
       allow read: if isTeacher() || (isActiveStudent() && myId()[0:1] == year);
       allow write: if isTeacher();
     }
+    // schedule (year plan + makeup sessions): one document per year, students read their own year
+    match /schedule/{year} {
+      allow read: if isTeacher() || (isActiveStudent() && myId()[0:1] == year);
+      allow write: if isTeacher();
+    }
     match /revisions_public/{year} {
       allow read: if isTeacher() || (isActiveStudent() && myId()[0:1] == year);
       allow write: if isTeacher();

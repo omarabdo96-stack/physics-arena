@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/schedule.css">
 <link rel="stylesheet" href="css/teacher.css">
 </head>
 <body>
@@ -63,6 +64,7 @@
       <button type="button" data-view="content">Study content <span class="ar">المحتوى</span></button>
       <button type="button" data-view="revisions">Revisions <span class="ar">المراجعات</span></button>
       <button type="button" data-view="announce">Announcements <span class="ar">الإعلانات</span></button>
+      <button type="button" data-view="schedule">Schedule <span class="ar">الجدول</span></button>
     </div>
 
     <section class="block" id="studentsBlock">
@@ -129,6 +131,30 @@
       </div>
       <p class="note">These appear on the Home tab of every student in the selected year. Pinned and important ones stand out.</p>
       <div id="annList" class="list"></div>
+    </section>
+
+    <section class="block" id="schedBlock" hidden>
+      <div class="toolbar">
+        <h3 id="schedTitleH" style="margin:0;flex:1 1 200px">Schedule</h3>
+      </div>
+      <p class="note">Students of the selected year see this in their Schedule tab. Weeks run <b>Saturday to Friday</b>.</p>
+
+      <h4 class="sub-h0">Year plan <span class="ar">خطة العام</span></h4>
+      <div class="field plain">
+        <label for="schedStart">Start date of week 1 <span class="ar">بداية أول أسبوع</span></label>
+        <div class="inp"><input id="schedStart" type="date"></div>
+        <small class="hint" id="schedStartNote"></small>
+      </div>
+      <div class="toolbar">
+        <button class="btn small primary" id="addLessonsBtn" type="button"><span class="btn-label">Add lessons <span class="ar">إضافة دروس</span></span></button>
+        <button class="btn small ghost" id="addBreakBtn" type="button">Add break week <span class="ar">أسبوع إجازة</span></button>
+      </div>
+      <div id="schedPlan" class="list"></div>
+
+      <div class="toolbar sub-h"><h4 style="margin:0;flex:1">Makeup sessions <span class="ar">جدول التعويض</span></h4>
+        <button class="btn small primary" id="addMakeupBtn" type="button"><span class="btn-label">Add makeup session <span class="ar">إضافة تعويض</span></span></button>
+      </div>
+      <div id="schedMakeup" class="list"></div>
     </section>
   </main>
 </div>
@@ -206,6 +232,31 @@
     <label class="chk" id="annAllRow"><input type="checkbox" id="annAll"> Post to all three years</label>
     <p class="err" id="annErr" hidden></p>
     <div class="dlg-actions"><button class="btn small ghost" type="button" id="annCancel">Cancel <span class="ar">إلغاء</span></button><button class="btn small primary" type="submit"><span class="btn-label">Post <span class="ar">نشر</span></span></button></div>
+  </form>
+</dialog>
+
+
+<dialog id="dlgLesson">
+  <form id="lessonForm" novalidate>
+    <h3 id="lsDlgTitle">Add lessons</h3>
+    <div class="field plain"><label for="lsText" id="lsLabel">Lesson names</label><textarea id="lsText" rows="7"></textarea><small class="hint" id="lsHint"></small></div>
+    <div class="field plain" id="lsStatusRow" hidden><label for="lsStatus">Status <span class="ar">الحالة</span></label><div class="inp"><select id="lsStatus"></select></div><small class="hint">Automatic follows today's date. Pick another only for a special case, for example a postponed lesson.</small></div>
+    <p class="err" id="lsErr" hidden></p>
+    <div class="dlg-actions"><button class="btn small ghost" type="button" id="lsCancel">Cancel <span class="ar">إلغاء</span></button><button class="btn small primary" type="submit"><span class="btn-label">Save <span class="ar">حفظ</span></span></button></div>
+  </form>
+</dialog>
+
+<dialog id="dlgMakeup">
+  <form id="makeupForm" novalidate>
+    <h3 id="mkDlgTitle">Add makeup session</h3>
+    <div class="two">
+      <div class="field plain"><label for="mkDay">Day <span class="ar">اليوم</span></label><div class="inp"><select id="mkDay"></select></div></div>
+      <div class="field plain"><label for="mkTime">Time <span class="ar">الموعد</span></label><div class="inp"><input id="mkTime" type="time"></div></div>
+    </div>
+    <div class="field plain"><label for="mkTitle">Title / address <span class="ar">العنوان</span></label><div class="inp"><input id="mkTitle" autocomplete="off" placeholder="e.g. Makeup: Ohm's Law, Center name"></div></div>
+    <div class="field plain"><label for="mkUrl">Location link (optional) <span class="ar">لينك اللوكاشين</span></label><div class="inp"><input id="mkUrl" type="url" autocomplete="off" placeholder="https://maps.app.goo.gl/..."></div><small class="hint">Paste the link from Google Maps (Share, Copy link).</small></div>
+    <p class="err" id="mkErr" hidden></p>
+    <div class="dlg-actions"><button class="btn small ghost" type="button" id="mkCancel">Cancel <span class="ar">إلغاء</span></button><button class="btn small primary" type="submit"><span class="btn-label">Save <span class="ar">حفظ</span></span></button></div>
   </form>
 </dialog>
 

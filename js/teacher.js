@@ -4,6 +4,7 @@ import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, on
 import { createTreeManager } from './teacher-content.js';
 import { createAnnouncements } from './teacher-announcements.js';
 import { createRevisions } from './teacher-revisions.js';
+import { createSchedule } from './teacher-schedule.js';
 import { getFirestore, doc, getDoc, getDocs, collection, writeBatch, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -58,6 +59,7 @@ Link: ${site}
 
 const content = createTreeManager({ db, toast, root: $('#contentList'), collection: 'content' });
 const announcements = createAnnouncements({ db, toast });
+const schedule = createSchedule({ db, toast });
 function codeWa(kind, studentId, code, title) {                 // WhatsApp link that sends a revision code to a student or parent
   const s = students.find(x => x.id === studentId), p = priv[studentId] || {};
   const phone = normPhone(kind === 'parent' ? p.parentPhone : p.studentPhone);
@@ -81,6 +83,7 @@ function loadView(y) {
   if (view === 'content') { $('#contentTitle').textContent = `Study content, ${YEAR_LABEL[y]}`; content.load(y); }
   else if (view === 'revisions') revisions.load(y);
   else if (view === 'announce') announcements.load(y);
+  else if (view === 'schedule') schedule.load(y);
 }
 
 /* ---------- sign in / out ---------- */
@@ -124,7 +127,7 @@ async function loadAll() {
       : 'Could not load students. Check your connection and press Refresh.';
   }
 }
-$('#refreshBtn').addEventListener('click', async () => { await loadAll(); if (view === 'content') { await content.reload(year); $('#contentTitle').textContent = `Study content, ${YEAR_LABEL[year]}`; } else if (view === 'revisions') await revisions.reload(year); else if (view === 'announce') await announcements.reload(year); toast('Refreshed'); });
+$('#refreshBtn').addEventListener('click', async () => { await loadAll(); if (view === 'content') { await content.reload(year); $('#contentTitle').textContent = `Study content, ${YEAR_LABEL[year]}`; } else if (view === 'revisions') await revisions.reload(year); else if (view === 'announce') await announcements.reload(year); else if (view === 'schedule') await schedule.reload(year); toast('Refreshed'); });
 
 /* ---------- tabs ---------- */
 const tabs = $('#tabs'), ink = $('#tabInk');
@@ -294,6 +297,7 @@ $('#seg').addEventListener('click', e => {
   $('#contentBlock').hidden = view !== 'content';
   $('#revBlock').hidden = view !== 'revisions';
   $('#annBlock').hidden = view !== 'announce';
+  $('#schedBlock').hidden = view !== 'schedule';
   if (view !== 'students') loadView(year);
 });
 $('#addWeekBtn').addEventListener('click', () => content.addWeek());

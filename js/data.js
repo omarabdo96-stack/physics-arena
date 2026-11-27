@@ -13,6 +13,7 @@ export function createData({ db, id }) {
     marks: f => once('marks', () => one('marks', id), undefined, f),
     content: f => once('content', async () => (await one('content', yearKey) || { weeks: [] }).weeks || [], undefined, f),
     news: f => once('news', async () => (await one('announcements', yearKey) || { items: [] }).items || [], undefined, f),
+    schedule: f => once('schedule', async () => { const d = await one('schedule', yearKey) || {}; return { startDate: d.startDate || '', lessons: d.lessons || [], makeup: d.makeup || [] }; }, undefined, f),
     catalog: f => once('catalog', async () => await one('revisions_public', yearKey) || { items: [] }, undefined, f),
     trophies: f => once('trophies', async () => (await one('trophies', id) || { unlocked: {} }), undefined, f),
     reds: f => once('reds', async () => {

@@ -4,6 +4,7 @@ import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from
 import { createViewer, initStudy } from './study.js';
 import { initMarks } from './marks.js';
 import { initHome } from './home.js';
+import { initSchedule } from './schedule.js';
 import { initRevisions } from './revisions.js';
 import { createData } from './data.js';
 import { createTracker } from './tracker.js';
@@ -29,11 +30,11 @@ const db = getFirestore(fb);
 /* ---------- Helpers ---------- */
 const loginView = $('#loginView'), appView = $('#appView');
 const sid = $('#sid'), pw = $('#pw'), errBox = $('#loginErr'), loginBtn = $('#loginBtn');
-let toastTimer, viewer = null, study = null, marks = null, home = null, revs = null, data = null, tracker = null, ach = null, parent = null;
+let toastTimer, viewer = null, study = null, marks = null, home = null, sched = null, revs = null, data = null, tracker = null, ach = null, parent = null;
 const onRedeemed = () => { data && data.drop('reds'); ach && ach.refresh(false); };
 function disposeAll() {
-  [study, marks, home, revs, ach, parent, tracker, viewer].forEach(x => x && x.dispose());
-  study = marks = home = revs = ach = parent = tracker = viewer = data = null;
+  [study, marks, home, sched, revs, ach, parent, tracker, viewer].forEach(x => x && x.dispose());
+  study = marks = home = sched = revs = ach = parent = tracker = viewer = data = null;
   removeEventListener('pa:redeemed', onRedeemed);
 }
 function toast(msg) {
@@ -136,6 +137,7 @@ function enterApp(id, name) {
   study = initStudy({ db, id, name, viewer });
   marks = initMarks({ db, id });
   home = initHome({ data, id });
+  sched = initSchedule({ data });
   revs = initRevisions({ db, id, name, viewer });
   ach = createTrophyCase({ db, id, data, tracker });
   parent = initParent({ data, tracker, ach, id, name });
@@ -168,6 +170,7 @@ function showTab(name, push = true) {
   if (name === 'study' && study) study.open();
   if (name === 'marks' && marks) marks.open();
   if (name === 'home' && home) home.open();
+  if (name === 'schedule' && sched) sched.open();
   if (name === 'revisions' && revs) revs.open();
   if (name === 'achievements' && ach) ach.open();
   if (name === 'parent' && parent) parent.open();

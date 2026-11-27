@@ -113,3 +113,15 @@ select option{background:#10154a;color:#fff}
 .pill:hover{color:#fff;border-color:var(--indigo)}
 .pill.on{color:#fff;border-color:transparent;background:linear-gradient(110deg,var(--indigo-deep),var(--indigo) 60%,#8A63F0);box-shadow:0 8px 22px -8px rgba(91,110,225,.9)}
 #revPicker .nothing{width:100%}
+
+/* schedule (teacher) */
+.sub-h0{font-size:15px;font-weight:800;margin:4px 0 10px}
+.hint.warn{color:#FFD27A}
+.srow.plan .who small{display:flex;flex-wrap:wrap;align-items:center;gap:2px 0}
+.srow.plan.brk{border-style:dashed}
+.idbadge.is-break{background:linear-gradient(120deg,#6A3FC4,#8A63F0);font-size:12px}
+.idbadge.mk{background:linear-gradient(120deg,#C23A71,var(--pink))}
+.acts button[disabled]{opacity:.35;cursor:not-allowed}
+.acts button.danger:hover{background:rgba(255,98,144,.22);border-color:var(--pink);color:#fff}
+#schedStart{letter-spacing:0;font-size:15px;color-scheme:dark}
+#mkTime{letter-spacing:0;font-size:15px;color-scheme:dark}

@@ -1,0 +1,59 @@
+/* Schedule: status chips (student + teacher) and the student Schedule tab */
+.stp{display:inline-block;font-style:normal;font-size:11.5px;font-weight:700;padding:3px 11px;border-radius:99px;white-space:nowrap;background:rgba(160,170,255,.16);color:var(--lav);margin-inline-start:6px}
+.stp.st-completed{background:rgba(91,227,168,.2);color:#9BF2CB}
+.stp.st-current{background:linear-gradient(90deg,var(--indigo),var(--pink));color:#fff}
+.stp.st-upcoming{background:rgba(160,170,255,.14);color:var(--lav)}
+.stp.st-postponed{background:rgba(255,196,102,.2);color:#FFD27A}
+.stp.st-break{background:rgba(138,99,240,.28);color:#E2D6FF}
+
+#schedRoot{display:grid;gap:26px}
+.sc-sec h4{font-size:16px;font-weight:800;margin-bottom:12px}
+.sc-prog{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px;color:var(--mut);font-size:13px}
+.sc-prog b{color:var(--ink);font-weight:800}
+.sc-bar{flex:1 1 180px;height:9px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
+.sc-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--ok),var(--indigo));animation:scGrow 1s cubic-bezier(.2,.8,.2,1) both;transform-origin:left}
+@keyframes scGrow{from{transform:scaleX(0)}}
+
+.sc-table{border:1px solid var(--line);border-radius:20px;overflow:hidden;background:rgba(8,10,40,.35)}
+.sc-row{display:grid;grid-template-columns:64px minmax(0,1.6fr) 150px 120px 120px;align-items:center;gap:10px;padding:13px 16px;border-top:1px solid rgba(160,170,255,.1);font-size:14.5px}
+.sc-row:first-child{border-top:0}
+.sc-head{background:linear-gradient(110deg,var(--indigo-deep),var(--indigo));font-weight:800;font-size:13px;border-top:0}
+.sc-head .ar{color:#E9ECFF}
+.sc-row .no{font-weight:800;text-align:center;color:var(--lav)}
+.sc-row .ls{font-weight:700;min-width:0}
+.sc-row .dt{font-variant-numeric:tabular-nums;color:var(--lav);font-weight:600}
+.sc-row .stp{margin:0}
+.sc-row.st-row-current{background:linear-gradient(90deg,rgba(91,110,225,.28),rgba(255,98,144,.14));box-shadow:inset 3px 0 0 var(--pink)}
+.sc-row.st-row-completed .ls{color:var(--mut);font-weight:600}
+.sc-break{background:rgba(138,99,240,.1);font-style:italic}
+
+.sc-week-note{display:flex;gap:12px;align-items:flex-start;padding:13px 16px;margin-bottom:14px;border-radius:16px;background:rgba(255,196,102,.1);border:1px solid rgba(255,196,102,.35);color:#FFE2A8}
+.sc-week-note svg{flex:0 0 22px;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;margin-top:1px}
+.sc-week-note p{font-size:13.5px;line-height:1.6}
+.sc-week-note b{color:#fff}
+.sc-week-note .ar{color:#FFE2A8}
+
+.mk-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+.mk-s{position:relative;display:grid;gap:7px;padding:16px;border-radius:20px;background:rgba(255,255,255,.04);border:1px solid var(--line);animation:panelIn .5s both}
+.mk-s.today{border-color:var(--pink);background:rgba(255,98,144,.08)}
+.mk-day{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.mk-day b{font-size:16px}
+.mk-day .stp{margin-inline-start:auto}
+.mk-time{font-size:22px;font-weight:800;letter-spacing:-.01em;background:linear-gradient(90deg,#fff,var(--lav) 60%,var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;width:fit-content}
+.mk-title{color:var(--lav);font-size:14px;line-height:1.55;overflow-wrap:anywhere}
+.mk-loc{display:inline-flex;align-items:center;gap:8px;width:fit-content;margin-top:4px;padding:9px 14px;border-radius:12px;font:700 13px var(--font);text-decoration:none;color:#fff;background:linear-gradient(110deg,var(--indigo-deep),var(--indigo));box-shadow:0 8px 20px -8px rgba(91,110,225,.9);transition:transform .2s}
+.mk-loc:hover{transform:translateY(-2px)}
+.mk-loc svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.mk-loc.off{background:none;box-shadow:none;color:var(--mut);font-weight:600;padding-inline:0}
+
+@media (max-width:720px){
+  .sc-head{display:none}
+  .sc-row{grid-template-columns:42px 1fr auto;grid-template-areas:"no ls st" ". s s" ". e e";gap:4px 10px;padding:13px 14px}
+  .sc-row .no{grid-area:no}
+  .sc-row .ls{grid-area:ls}
+  .sc-row .st{grid-area:st;justify-self:end}
+  .sc-row .dt:nth-last-of-type(2){grid-area:s}
+  .sc-row .dt:last-of-type{grid-area:e}
+  .sc-row .dt{font-size:13px}
+  .sc-row .dt::before{content:attr(data-l) ": ";color:var(--mut);font-weight:600}
+}
